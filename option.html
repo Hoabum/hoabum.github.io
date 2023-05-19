@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/Scss/style.css">
+    <link rel="stylesheet" href="/Scss/resset.css">
+</head>
+
+<body>
+    <div class="container">
+        <img src="img/277252082_659065365148769_3333818436821694111_n.jpg" alt="" width="50px" height="50px">
+        <div class="option">
+            <label>
+                <input type="radio" name="check" value="page1">
+                Trắc nghiệm
+              </label>
+
+            <label>
+                <input type="radio" name="check" value="page2">
+                Tự luận
+              </label>
+
+            <label>
+                <input type="radio" name="check" value="page3">
+                Trắc nghiệm và tự luận 
+              </label>
+
+        </div>
+        <button id="chuyen-trang" class="Start"> Bắt đầu</button>
+    </div>
+</body>
+<script>
+    document.getElementById("chuyen-trang").addEventListener("click", function() {
+        var selectedPage = document.querySelector('input[name="check"]:checked');
+        if (selectedPage) {
+            var pageURL = selectedPage.value + ".html";
+            window.location.href = pageURL;
+        }
+    });
+</script>
+
+</html>

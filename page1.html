@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trắc Nghiệm</title>
+    <!-- <link rel="stylesheet" href="/Scss/style.css"> -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+        }
+        
+        #quiz-container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        #question {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        #options {
+            margin-bottom: 20px;
+        }
+        
+        #result {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            display: block;
+            margin: 12px auto;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        
+        #back-btn {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        #input-container {
+            margin-bottom: 20px;
+        }
+        
+        #vocabulary-input {
+            width: 100%;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+        
+        .correct {
+            color: green;
+        }
+        
+        .incorrect {
+            color: red;
+        }
+        
+        img {
+            border-radius: 50%;
+            position: absolute;
+            right: 60px;
+            top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="quiz-container">
+        <h1>Vocabulary Quiz</h1>
+        <img src="img/277252082_659065365148769_3333818436821694111_n.jpg" alt="" width="50px" height="50px">
+        <div id="question"></div>
+        <div id="options"></div>
+        <div id="result"></div>
+        <textarea id="vocabulary-list" rows="5" cols="65" placeholder="Enter vocabulary list (word:definition)"></textarea>
+        <button id="start-btn">Start</button>
+        <button id="submit-btn" style="display: none;">Submit</button>
+        <button id="back-btn" style="display: none;">Back</button>
+    </div>
+
+
+
+
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+<script>
+    $(document).ready(function() {
+        var vocabularyList = [];
+        var questionIndex = 0;
+        var score = 0;
+
+        function generateQuestion() {
+            if (questionIndex >= vocabularyList.length) {
+                showResult();
+                return;
+            }
+
+            var question = vocabularyList[questionIndex].word;
+            var options = getRandomOptions(questionIndex);
+
+            $("#question").text("What is the meaning of the word " + ` "` + question + `"`);
+            $("#options").empty();
+            speak(question)
+            for (var i = 0; i < options.length; i++) {
+                var option = $("<input type='radio' name='option' value='" + options[i].definition + "'> " + options[i].definition + "<br>");
+                $("#options").append(option);
+            }
+        }
+        var temp
+
+        function speak(text) {
+            temp = text
+        }
+
+        function getRandomOptions(questionIndex) {
+            var options = vocabularyList.slice(); // Copy the vocabulary list
+            options.splice(questionIndex, 1); // Remove the correct answer from the options
+            options = shuffle(options).slice(0, 3); // Randomly select 3 incorrect options
+            options.push(vocabularyList[questionIndex]); // Add the correct answer to the options
+            return shuffle(options);
+        }
+
+        function shuffle(array) {
+            var currentIndex = array.length,
+                temporaryValue, randomIndex;
+
+            while (0 !== currentIndex) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex -= 1;
+                temporaryValue = array[currentIndex];
+                array[currentIndex] = array[randomIndex];
+                array[randomIndex] = temporaryValue;
+            }
+
+            return array;
+        }
+
+        function showResult() {
+            $("#question").empty();
+            $("#options").empty();
+            $("#result").text("Score: " + score + "/" + vocabularyList.length);
+            $("#back-btn").show();
+        }
+
+        $("#start-btn").click(function() {
+            var userInput = $("#vocabulary-list").val();
+            parseVocabularyList(userInput);
+            generateQuestion();
+            $("#start-btn").hide();
+            $("#vocabulary-list").hide();
+            $("#submit-btn").show();
+        });
+
+        $("#submit-btn").click(function() {
+            var selectedOption = $("input[name='option']:checked").val();
+            var correctOption = vocabularyList[questionIndex].definition;
+
+
+
+            if (selectedOption === correctOption) {
+                score++;
+                $("#result").text("Correct!");
+            } else {
+                $("#result").text("Incorrect! Correct answer: " + correctOption);
+
+            }
+            speakText(temp)
+            console.log(temp)
+            setTimeout(function() {
+                $("#result").text(" ");
+                questionIndex++;
+                generateQuestion();
+
+            }, 1000);
+
+        });
+
+        function speakText(text) {
+            var speech = new SpeechSynthesisUtterance();
+            speech.text = text;
+            window.speechSynthesis.speak(speech);
+        }
+
+        $("#back-btn").click(function() {
+            questionIndex = 0;
+            score = 0;
+            $("#result").empty();
+            $("#options").empty();
+            $("#submit-btn").hide();
+            $("#back-btn").hide();
+            $("#start-btn").show();
+            $("#vocabulary-list").show();
+            $("#vocabulary-list").val('');
+        });
+
+        function parseVocabularyList(input) {
+            var lines = input.split("\n");
+
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i].trim();
+
+                if (line.length > 0) {
+                    var parts = line.split(":");
+
+                    if (parts.length === 2) {
+                        var word = parts[0].trim();
+                        var definition = parts[1].trim();
+
+                        vocabularyList.push({
+                            word: word,
+                            definition: definition
+                        });
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+</html>

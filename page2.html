@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+        }
+        
+        #quiz-container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        #question {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        #result {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            display: block;
+            margin: 0 auto;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        
+        #back-btn {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        img {
+            border-radius: 50%;
+            position: absolute;
+            right: 60px;
+            top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="quiz-container">
+        <h1>Vocabulary Quiz</h1>
+        <img src="img/277252082_659065365148769_3333818436821694111_n.jpg" alt="" width="50px" height="50px">
+        <div id="question"></div>
+        <div id="result"></div>
+        <textarea id="vocabulary-list" rows="5" cols="50" placeholder="Enter vocabulary list (vocabulary:meaning)"></textarea>
+        <input type="text" style="display: none;" id="user-answer" placeholder="Enter your answer">
+        <button id="start-btn">Start</button>
+        <button id="submit-btn" style="display: none;">Submit</button>
+        <button id="back-btn" style="display: none;">Back</button>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            var vocabularyList = [];
+            var questionIndex = 0;
+            var score = 0;
+
+
+            function generateQuestion() {
+                if (questionIndex >= vocabularyList.length) {
+                    showResult();
+                    return;
+                }
+
+                var question = vocabularyList[questionIndex].meaning;
+
+                $("#question").text(question);
+                $("#result").empty();
+            }
+
+            function shuffle(array) {
+                var currentIndex = array.length,
+                    temporaryValue, randomIndex;
+
+                while (0 !== currentIndex) {
+                    randomIndex = Math.floor(Math.random() * currentIndex);
+                    currentIndex -= 1;
+                    temporaryValue = array[currentIndex];
+                    array[currentIndex] = array[randomIndex];
+                    array[randomIndex] = temporaryValue;
+                }
+
+                return array;
+            }
+
+            function showResult() {
+                $("#question").empty();
+                $("#result").text("Score: " + score + "/" + vocabularyList.length);
+                $("#back-btn").show();
+            }
+
+            $("#start-btn").click(function() {
+                var userInput = $("#vocabulary-list").val();
+                parseVocabularyList(userInput);
+                vocabularyList = shuffle(vocabularyList);
+                generateQuestion();
+                $("#start-btn").hide();
+                $("#submit-btn").show();
+                $("#vocabulary-list").hide();
+                $("#user-answer").show();
+            });
+
+            $("#submit-btn").click(function() {
+                var userInput = $("#user-answer").val();
+                var correctAnswer = vocabularyList[questionIndex].vocabulary;
+
+                if (userInput.toLowerCase() === correctAnswer.toLowerCase()) {
+                    score++;
+                    $("#result").text("Correct!");
+                } else {
+                    $("#result").text("Wrong! The correct answer is: " + correctAnswer);
+                }
+
+                $("#user-answer").val(''); // Xóa nội dung trong ô input
+
+                setTimeout(function() {
+                    $("#result").text(" ");
+                    questionIndex++;
+                    generateQuestion();
+
+                }, 4000);
+
+            });
+
+            $("#back-btn").click(function() {
+                questionIndex = 0;
+                score = 0;
+                vocabularyList = [];
+                $("#result").empty();
+                $("#question").empty();
+                $("#vocabulary-list").val('');
+                $("#user-answer").val('');
+                $("#back-btn").hide();
+                $("#submit-btn").hide();
+                $("#start-btn").show();
+            });
+
+            function parseVocabularyList(input) {
+                var lines = input.split("\n");
+
+                for (var i = 0; i < lines.length; i++) {
+                    var line = lines[i].trim();
+
+                    if (line.length > 0) {
+                        var parts = line.split(":");
+
+                        if (parts.length === 2) {
+                            var vocabulary = parts[0].trim();
+                            var meaning = parts[1].trim();
+
+                            vocabularyList.push({
+                                vocabulary: vocabulary,
+                                meaning: meaning
+                            });
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

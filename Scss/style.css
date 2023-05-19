@@ -1,0 +1,62 @@
+.flex {
+  display: flex;
+}
+
+.a-center {
+  align-items: center;
+}
+
+.j-between {
+  justify-content: space-between;
+}
+
+.f-column {
+  flex-direction: column;
+}
+
+.t-align {
+  text-align: justify;
+}
+
+.none {
+  display: none;
+  opacity: 0 !important;
+}
+
+.j-center {
+  justify-content: center;
+}
+
+.container {
+  max-width: 1200px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.container .Start {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 40px;
+  border: none;
+  background: #0e9d53;
+  color: white;
+}
+.container .option {
+  display: grid;
+  position: fixed;
+  top: 40%;
+  left: 48%;
+  transform: translate(-50%, -50%);
+}
+.container .option label {
+  margin-bottom: 10px;
+}
+.container img {
+  border-radius: 50%;
+  position: absolute;
+  right: 60px;
+  top: 20px;
+}/*# sourceMappingURL=style.css.map */

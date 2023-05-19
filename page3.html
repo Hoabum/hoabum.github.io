@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+        }
+        
+        #quiz-container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        #question {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        #options {
+            margin-bottom: 20px;
+        }
+        
+        #result {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            display: block;
+            margin: 0 auto;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        
+        #back-btn {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        img {
+            border-radius: 50%;
+            position: absolute;
+            right: 60px;
+            top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="quiz-container">
+        <h1>Vocabulary Quiz</h1>
+        <img src="img/277252082_659065365148769_3333818436821694111_n.jpg" alt="" width="50px" height="50px">
+        <div>
+
+            <textarea id="vocabulary-list" rows="5" cols="60"></textarea>
+            <button id="start-btn">Start</button>
+        </div>
+        <div id="question"></div>
+        <div id="options"></div>
+        <div id="result"></div>
+        <button id="submit-btn" style="display: none;">Submit</button>
+        <button id="back-btn">Back</button>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            var vocabularyList = []; // Khởi tạo danh sách từ vựng trống
+
+            $("#start-btn").click(function() {
+
+                var inputText = $("#vocabulary-list").val();
+                parseVocabularyList(inputText);
+                startQuiz();
+                $("#start-btn").hide();
+                $("#vocabulary-list").hide();
+                $("#submit-btn").show();
+            });
+
+            function parseVocabularyList(inputText) {
+                var lines = inputText.split('\n');
+                for (var i = 0; i < lines.length; i++) {
+                    var line = lines[i].trim();
+                    if (line !== '') {
+                        var parts = line.split(':');
+                        if (parts.length === 2) {
+                            var vocabulary = parts[0].trim();
+                            var means = parts[1].trim();
+                            addVocabulary(vocabulary, means);
+                        }
+                    }
+                }
+            }
+
+            function addVocabulary(vocabulary, means) {
+                var newVocabulary = {
+                    vocabulary: vocabulary,
+                    means: means
+                };
+                vocabularyList.push(newVocabulary); // Thêm từ vựng vào danh sách
+            }
+
+            var questionIndex = 0;
+            var score = 0;
+
+            function startQuiz() {
+                $("#vocabulary-list").prop("disabled", true);
+                $("#start-btn").prop("disabled", true);
+                $("#submit-btn").prop("disabled", false);
+                generateQuestion();
+            }
+
+            function generateQuestion() {
+                if (questionIndex >= vocabularyList.length) {
+                    showResult();
+                    return;
+                }
+
+                var randomQuestionType = Math.random();
+                if (randomQuestionType < 0.7) {
+                    generateMultipleChoiceQuestion();
+                } else {
+                    generateEssayQuestion();
+                }
+            }
+
+            function generateMultipleChoiceQuestion() {
+                var question = vocabularyList[questionIndex].means;
+                var options = getRandomOptions(questionIndex);
+
+                $("#question").text("What is the meaning of the word " + ` "` + question + `"`);
+                $("#options").empty();
+                // speak(question);
+                for (var i = 0; i < options.length; i++) {
+                    var option = $("<input type='radio' name='option' value='" + options[i].vocabulary + "'> " + options[i].vocabulary + "<br>");
+                    $("#options").append(option);
+
+                }
+            }
+
+            var temp
+
+            function speak(text) {
+                temp = text
+            }
+
+            function generateEssayQuestion() {
+                var question = vocabularyList[questionIndex].means;
+
+                $("#question").text("What is the meaning of the word " + ` "` + question + `"`);
+                // speak(question);
+                $("#options").empty();
+
+                $("#options").append("<textarea id='user-answer' rows='4' cols='60'></textarea>");
+            }
+
+
+            function getRandomOptions(questionIndex) {
+                var options = vocabularyList.slice(); // Copy the vocabulary list
+                options.splice(questionIndex, 1); // Remove the correct answer from the options
+                options = shuffle(options).slice(0, 3); // Randomly select 3 incorrect options
+                options.push(vocabularyList[questionIndex]); // Add the correct answer to the options
+                return shuffle(options);
+            }
+
+            function shuffle(array) {
+                var currentIndex = array.length,
+                    temporaryValue, randomIndex;
+
+                while (0 !== currentIndex) {
+                    randomIndex = Math.floor(Math.random() * currentIndex);
+                    currentIndex -= 1;
+                    temporaryValue = array[currentIndex];
+                    array[currentIndex] = array[randomIndex];
+                    array[randomIndex] = temporaryValue;
+                }
+
+                return array;
+            }
+
+            function showResult() {
+                $("#question").empty();
+                $("#options").empty();
+                $("#result").text("Score: " + score + "/" + vocabularyList.length);
+                $("#back-btn").show();
+            }
+
+            $("#submit-btn").click(function() {
+
+                var userInput;
+                if ($("#user-answer").length > 0) {
+                    userInput = $("#user-answer").val();
+                } else {
+                    userInput = $("input[name='option']:checked").val();
+                }
+
+                var correctAnswer;
+                if (questionIndex < vocabularyList.length) {
+                    correctAnswer = vocabularyList[questionIndex].vocabulary;
+                }
+
+                if (userInput && correctAnswer) {
+                    if (userInput.toLowerCase() === correctAnswer.toLowerCase()) {
+                        score++;
+                        $("#result").text("Correct!");
+                    } else {
+                        $("#result").text("Wrong! The correct answer is: " + correctAnswer);
+                    }
+                }
+
+                if ($("#user-answer").length > 0) {
+                    $("#user-answer").val(''); // Xóa nội dung trong ô input
+                }
+
+                speakText(temp)
+                console.log(temp)
+
+                setTimeout(function() {
+                    $("#result").text(" ");
+                    questionIndex++;
+                    generateQuestion();
+
+                }, 1000);
+            });
+
+            function speakText(text) {
+                var speech = new SpeechSynthesisUtterance();
+                speech.text = text;
+                window.speechSynthesis.speak(speech);
+            }
+            $("#back-btn").click(function() {
+                questionIndex = 0;
+                score = 0;
+                $("#submit-btn").hide();
+                $("#result").empty();
+                $("#back-btn").hide();
+                $("#vocabulary-list").val('').prop("disabled", false);
+                $("#start-btn").prop("disabled", false);
+                $("#submit-btn").prop("disabled", true);
+                $("#options").empty();
+                $("#start-btn").show();
+                $("#vocabulary-list").show();
+                $("#vocabulary-list").val('');
+            });
+        });
+    </script>
+</body>
+
+</html>
